@@ -122,7 +122,6 @@ const EditBlogSection = () => {
                 }}
                 initialValue=""
               />
-              <h1>asdasd</h1>
             </Form.Group>
             <div className="my-3 rounded shadow p-3">
               <div className="mb-4">
