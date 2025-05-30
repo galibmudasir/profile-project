@@ -62,7 +62,11 @@ const Header = () => {
       initial={{ y: -100, opacity: 0 }} // State awal
       exit={{ y: -100, opacity: 0 }} // Animasi saat keluar
       transition={{ duration: 1 }}
-      className={scrolled ? "site-header header-scrolled" : "site-header"}
+      className={
+        scrolled || collapseMenu == true
+          ? "site-header header-scrolled"
+          : "site-header"
+      }
     >
       <nav className="navbar navbar-expand-lg py-3">
         <div className="container-fluid">

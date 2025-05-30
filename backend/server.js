@@ -17,6 +17,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: "http://localhost:3000" }));
 
+const createSlug = (title) => {
+  return (
+    "/blog/" +
+    title
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]+/g, "")
+  );
+};
+
 // endpoint data blog publish
 app.get("/api/data-blog", (req, res) => {
   db.query(
@@ -132,16 +142,6 @@ app.post("/api/data-blog/add", upload.single("thumbnail"), (req, res) => {
     return res.status(400).json({ message: "Semua field harus diisi" });
   }
 
-  const createSlug = (title) => {
-    return (
-      "/blog/" +
-      title
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(/[^\w-]+/g, "")
-    );
-  };
-
   const insert = [
     `NULL`,
     title,
@@ -167,6 +167,56 @@ app.post("/api/data-blog/add", upload.single("thumbnail"), (req, res) => {
       insertedId: result.insertId,
       thumbnailPath: thumbnail,
     });
+  });
+});
+
+//endpoint update artikel
+app.post("/api/data-blog/edit", upload.single("thumbnail"), (req, res) => {
+  const { title, content, excerpt, keyword, status, date, id } = req.body;
+  if (!title || !content || !excerpt || !keyword || !status || !date || !id) {
+    return res.status(400).json({ message: "Semua field harus diisi" });
+  }
+
+  const params = [
+    title,
+    "Galib Mudasir",
+    date,
+    createSlug(title),
+    content,
+    excerpt,
+    status,
+    keyword,
+  ];
+
+  // Query dasar tanpa kolom image
+  let query = `
+      UPDATE blog_data
+      SET  title   = ?, 
+           author  = ?, 
+           date    = ?, 
+           link    = ?, 
+           content = ?, 
+           excerpt = ?, 
+           status  = ?, 
+           keyword = ?
+    `;
+
+  // Tambahkan kolom image kalau ada file upload
+  if (req.file) {
+    query += ", image = ?";
+    params.push(`/assets/image/${req.file.filename}`);
+  }
+
+  // Tambahkan klausa WHERE dan id
+  query += " WHERE id = ?";
+  params.push(id);
+
+  db.query(query, params, (error, result) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Gagal mengedit data" });
+    }
+    return res.status(200).json({ message: "Blog berhasil diedit" });
   });
 });
 

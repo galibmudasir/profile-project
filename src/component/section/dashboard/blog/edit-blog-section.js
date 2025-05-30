@@ -1,6 +1,6 @@
 import { Form } from "react-bootstrap";
 import { Editor } from "@tinymce/tinymce-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 const EditBlogSection = () => {
@@ -10,6 +10,7 @@ const EditBlogSection = () => {
   const params = useParams();
   const blogId = params.blogId;
 
+  //set blog data
   const [blogData, setBlogdata] = useState({
     title: "",
     content: "",
@@ -19,8 +20,11 @@ const EditBlogSection = () => {
     status: "",
     date: "",
   });
+
+  //handle change form
   const handleImageChange = (event) => {
-    if (!event || !event.target || !event.target.files) return; // Mencegah error
+    if (blogData.thumbnail)
+      if (!event || !event.target || !event.target.files) return; // Mencegah error
     const file = event.target.files[0];
     if (file) {
       setImagePreview(URL.createObjectURL(file));
@@ -40,38 +44,60 @@ const EditBlogSection = () => {
   };
 
   // function ambil post
-  const getPosts = async () => {
-    const request = { id: blogId };
+  useEffect(() => {
+    const getPosts = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/data-blog/getid", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: blogId }),
+        });
+        const json = await res.json();
+        if (res.ok) {
+          setBlogdata(json.data[0]);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    getPosts();
+  }, [blogId]);
+
+  // handle update artikel
+  const handleEditBlog = async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("title", blogData.title);
+    formData.append("content", blogData.content);
+    formData.append("excerpt", blogData.excerpt);
+    formData.append("keyword", blogData.keyword);
+    formData.append("status", blogData.status);
+    formData.append("date", blogData.date);
+    formData.append("thumbnail", blogData.thumbnail); // Tambahkan file gambar
+    formData.append("id", blogId);
 
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/data-blog/getid",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(request),
-        }
-      );
+      const response = await fetch("http://localhost:5000/api/data-blog/edit", {
+        method: "POST",
+        body: formData, // Kirim FormData, bukan JSON
+      });
 
       const data = await response.json();
 
       if (response.ok) {
-        console.log(data.data[0]);
+        console.log("data berhasil di edit");
       } else {
-        console.log("data gagal diambil");
+        console.log("data gagal di edit"); // Tampilkan pesan error
       }
     } catch (error) {
-      console.log("Something went wrong. Please try again later.");
+      console.log("mungkin ada yang salah");
     }
   };
 
-  getPosts();
-
   return (
     <div className="add-blog-content">
-      <Form>
+      <Form onSubmit={handleEditBlog}>
         <div className="row">
           <div className="col-12 mb-4">
             <Form.Group className="mb-3">
@@ -81,6 +107,7 @@ const EditBlogSection = () => {
                 placeholder="Masukkan Judul"
                 name="title"
                 onChange={handleChange}
+                value={blogData.title}
               />
             </Form.Group>
           </div>
@@ -120,7 +147,7 @@ const EditBlogSection = () => {
                       Promise.reject("See docs to implement AI Assistant")
                     ),
                 }}
-                initialValue=""
+                initialValue={blogData.content}
               />
             </Form.Group>
             <div className="my-3 rounded shadow p-3">
@@ -133,6 +160,7 @@ const EditBlogSection = () => {
                     name="excerpt"
                     onChange={handleChange}
                     style={{ height: "100px" }}
+                    value={blogData.excerpt}
                   />
                 </Form.Group>
               </div>
@@ -145,6 +173,7 @@ const EditBlogSection = () => {
                     name="keyword"
                     style={{ height: "70px" }}
                     onChange={handleChange}
+                    value={blogData.keyword}
                   />
                 </Form.Group>
               </div>
@@ -174,9 +203,9 @@ const EditBlogSection = () => {
                     }}
                     onClick={() => document.getElementById("fileInput").click()}
                   >
-                    {imagePreview ? (
+                    {imagePreview || blogData.image ? (
                       <img
-                        src={imagePreview}
+                        src={imagePreview ? imagePreview : blogData.image}
                         alt="Thumbnail Preview"
                         style={{
                           width: "100%",
@@ -214,7 +243,11 @@ const EditBlogSection = () => {
               <div className="blog-status mb-4 shadow rounded p-3">
                 <Form.Group className="mb-3">
                   <Form.Label className="mb-3 h5">Status</Form.Label>
-                  <Form.Select name="status" onChange={handleChange}>
+                  <Form.Select
+                    name="status"
+                    onChange={handleChange}
+                    value={blogData.status}
+                  >
                     <option value="pending">Pending</option>
                     <option value="publish">Publish</option>
                   </Form.Select>
@@ -225,6 +258,7 @@ const EditBlogSection = () => {
                     type="date"
                     name="date"
                     onChange={handleChange}
+                    value={blogData.date}
                   ></Form.Control>
                 </Form.Group>
                 <div className="text-center">
