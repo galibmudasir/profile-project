@@ -1,10 +1,12 @@
-const mysql = require("mysql");
+const sqlite3 = require("sqlite3").verbose();
+const path = require("path");
 
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "react_app_profile",
-});
+const db = new sqlite3.Database(
+  path.resolve(__dirname, "data.sqlite"),
+  (err) => {
+    if (err) console.error("DB Error:", err.message);
+    else console.log("Connected to SQLite database.");
+  }
+);
 
 module.exports = db;
