@@ -15,7 +15,20 @@ const SECRET_KEY = "123456789";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: "http://localhost:3000" }));
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://profile-project-flax.vercel.app",
+];
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error("Not allowed by CORS"));
+    },
+  })
+);
 
 const createSlug = (title) => {
   return (
@@ -29,7 +42,7 @@ const createSlug = (title) => {
 
 // endpoint data blog publish
 app.get("/api/data-blog", (req, res) => {
-  db.query(
+  db.all(
     "SELECT * from blog_data WHERE status = 'publish'",
     (error, result) => {
       if (error) {
@@ -42,7 +55,7 @@ app.get("/api/data-blog", (req, res) => {
 
 // endpoint data blog all
 app.get("/api/data-blog/all", (req, res) => {
-  db.query("SELECT * from blog_data", (error, result) => {
+  db.all("SELECT * from blog_data", (error, result) => {
     if (error) {
       return response(500, null, "Error fetching data from database", res);
     }
@@ -60,7 +73,7 @@ app.post("/api/data-blog/getid", (req, res) => {
 
   const query = "SELECT * FROM blog_data WHERE id = ?";
 
-  db.query(query, [id], (error, result) => {
+  db.all(query, [id], (error, result) => {
     if (error) {
       return res
         .status(500)
@@ -81,8 +94,9 @@ app.post("/api/datauser/login", (req, res) => {
   }
 
   const query = "SELECT * FROM users WHERE username = ? AND password = ?";
-  db.query(query, [username, password], (error, result) => {
+  db.all(query, [username, password], (error, result) => {
     if (error) {
+      console.error("Database Error:", error.message); // <== Tambahkan ini
       return res
         .status(500)
         .json({ message: "Error fetching data from database", error });
@@ -117,7 +131,7 @@ app.delete("/api/data-blog/delete/:id", (req, res) => {
   // Query untuk menghapus data dari tabel blog_data
   const deleteQuery = "DELETE FROM blog_data WHERE id = ?";
 
-  db.query(deleteQuery, [blogId], (error, result) => {
+  db.run(deleteQuery, [blogId], (error, result) => {
     if (error) {
       // Jika ada error dari database
       return response(500, null, "Error deleting data from database", res);
@@ -157,7 +171,7 @@ app.post("/api/data-blog/add", upload.single("thumbnail"), (req, res) => {
 
   const query =
     "INSERT INTO `blog_data` (`id`, `title`, `author`, `date`, `image`, `link`, `content`, `excerpt`, `status`, `keyword`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-  db.query(query, insert, (erorr, result) => {
+  db.run(query, insert, (erorr, result) => {
     if (erorr) {
       return response(500, null, "Error adding data to database", res);
     }
@@ -211,7 +225,7 @@ app.post("/api/data-blog/edit", upload.single("thumbnail"), (req, res) => {
   query += " WHERE id = ?";
   params.push(id);
 
-  db.query(query, params, (error, result) => {
+  db.run(query, params, (error, result) => {
     if (error) {
       console.error(error);
       return res.status(500).json({ message: "Gagal mengedit data" });
