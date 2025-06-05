@@ -7,7 +7,6 @@ const response = require("./response");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const verifyToken = require("./middleware/verifytoken");
-const { a, ins } = require("framer-motion/client");
 
 const upload = require("./middleware/uploadhandler");
 

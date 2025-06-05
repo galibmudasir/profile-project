@@ -8,9 +8,11 @@ const BlogData = () => {
 
   useEffect(() => {
     // Fungsi fetch data
+    const backendUrl = process.env.REACT_APP_BACKEND_URL;
+
     const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/data-blog");
+        const response = await fetch(backendUrl + "/api/data-blog");
         if (!response.ok) {
           throw new Error("Data gagal diambil");
         }
@@ -33,17 +35,18 @@ const BlogData = () => {
   if (error) return <p>Error: {error}</p>;
 
   const dataBlogs = data.payload.datas;
-  console.log(dataBlogs);
+  const baseUrl = process.env.REACT_APP_BASE_URL;
+
   return (
     <div>
       <div className="row">
         {dataBlogs.map((item) => (
           <div className="col-sm-4 mx-auto" key={item.id}>
             <CardBlogs
-              image={"http://localhost:3000" + item.image}
+              image={baseUrl + item.image}
               title={item.title}
               excerpt={item.excerpt}
-              link={"http://localhost:3000" + item.link}
+              link={baseUrl + item.link}
             />
           </div>
         ))}

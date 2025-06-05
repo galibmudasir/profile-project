@@ -2,7 +2,6 @@ import "./assets/styles/App.css";
 import "bootstrap/dist/css/bootstrap.min.css"; // import bootstrap
 import "@dotlottie/player-component"; // Mengimpor dotlottie player
 import { Routes, Route } from "react-router-dom";
-import GlobalAnimationHandler from "./assets/styles/animation";
 
 import { useLocation } from "react-router-dom";
 
