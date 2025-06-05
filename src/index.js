@@ -57,11 +57,14 @@ export { default as ModeSwitcher } from "./component/modules/mode-switcher.js";
 export { default as SkillTabs } from "./component/modules/skill-tabs.js";
 export { default as Callout } from "./component/modules/callout.js";
 
+import { SpeedInsights } from "@vercel/speed-insights/react";
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <Router>
     <React.StrictMode>
       <App />
+      <SpeedInsights />
     </React.StrictMode>
   </Router>
 );
