@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter as Router } from "react-router-dom";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 // re-export modules agar mudah di import
 export { default as Header } from "./component/header.js";
@@ -56,8 +57,6 @@ export { default as ProjectCard } from "./component/modules/project-card.js";
 export { default as ModeSwitcher } from "./component/modules/mode-switcher.js";
 export { default as SkillTabs } from "./component/modules/skill-tabs.js";
 export { default as Callout } from "./component/modules/callout.js";
-
-import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
